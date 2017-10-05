@@ -10,7 +10,7 @@
 
     let publicNotes     = $( '#notes' );
     let privateNotes    = $( '#private_notes' );
-    let notesIntro = "### <?= date( "Y-m-d" ) . ' - ' . $t->ee( $t->user->getUsername() ) ?> \n\n\n\n";
+    let notesIntro = "### <?= date( "Y-m-d" ) . ' - ' . $t->ee( $t->user->getUsername() ) ?> \n\n";
 
     //////////////////////////////////////////////////////////////////////////////////////
     // action bindings:
@@ -19,7 +19,7 @@
         /**
          * Display the duplex ports area if this is a duplex port
          */
-        if( <?= (int)$t->hasDuplex ?> ){
+        if( <?= (int)$t->hasDuplex ?> ) {
             cb_duplex.prop('checked', true);
             div_duplex_port.show();
         }
@@ -28,7 +28,7 @@
     dd_switch.change(      () => { setSwitchPort();    } );
     dd_switch_port.change( () => { setCustomer();      } );
 
-    $( "#number" ).prop( 'readonly' , true);
+    $( "#number"      ).prop( 'readonly' , true);
     $( "#patch_panel" ).prop( 'readonly' , true);
 
     // The logic of these two blocks is:
@@ -47,11 +47,11 @@
     /**
      * display or hide the duplex port area
      */
-    cb_duplex.change( function(){
-        if( this.checked ){
+    cb_duplex.change( function() {
+        if( this.checked ) {
             if( $( '#partner_port option[value="<?= $t->ppp->getId() + 1 ?>"]' ).length ) {
                 dd_partner_port.val( <?= $t->ppp->getId() + 1 ?> );
-                dd_partner_port.trigger("changed");
+                dd_partner_port.trigger("change");
             }
             div_duplex_port.show();
         } else {
