@@ -307,5 +307,20 @@
 <?php $this->append() ?>
 
 <?php $this->section( 'scripts' ) ?>
+
+    <script>
+
+        ////////////////////////////////////////////////////////////////////
+        // set some PHP to JavaScript variables
+
+        // is this port part of a duplex port?
+        const hasDuplex  = <?= $t->hasDuplex ? 'true' : 'false' ?>;
+
+        // are we allocating the port?
+        const allocating = <?= $t->allocating ? 'true' : 'false' ?>;
+
+
+    </script>
+
     <?= $t->insert( 'patch-panel-port/js/edit' ); ?>
 <?php $this->append() ?>

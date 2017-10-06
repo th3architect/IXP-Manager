@@ -19,14 +19,13 @@
         /**
          * Display the duplex ports area if this is a duplex port
          */
-        if( <?= (int)$t->hasDuplex ?> ) {
+        if( hasDuplex ) {
             cb_duplex.prop('checked', true);
             div_duplex_port.show();
         }
     });
 
     dd_switch.change(      () => { setSwitchPort();    } );
-    dd_switch_port.change( () => { setCustomer();      } );
 
     $( "#number"      ).prop( 'readonly' , true);
     $( "#patch_panel" ).prop( 'readonly' , true);
@@ -60,42 +59,51 @@
     });
 
     /**
-     * set data to the customer dropdown when we select a switche port
-     * and check if the swich port has a physical interface set and with the possibility to change the status of the physical interface
+     * Set data in the customer dropdown when we select a switch port.
+     * Also check if the switch port has a physical interface set (i.e. it is allocated); and if it is,
+     * add the option to change the status of the physical interface.
      */
-    dd_switch_port.change(function(){
+    dd_switch_port.change( function() {
+
+        if( dd_switch.val() === '' ) {
+            return;
+        }
+
         setCustomer();
 
-        <?php if( $t->allocating ): ?>
-        $('#pi_status').val('');
-        $('#pi_status').trigger("changed");
+        if( allocating ) {
+            const dd_pi_status  = $('#pi_status');
+            const div_pi_status = $('#pi_status_area');
 
-        if( dd_switch_port.val() != '' ){
-            let spid = dd_switch_port.val();
-            $.ajax( "<?= url( '/api/v4/switch-port' ) ?>/" + spid + "/physical-interface" )
-            .done( function( data ) {
-                $( "#pi_status_area" ).hide();
-                if( data.physInt != undefined ) {
-                    $('#pi_status').val(data.physInt.status);
-                    $('#pi_status').trigger("changed");
-                    $("#pi_status_area").show();
-                }
-            })
-            .fail( function() {
-                alert( "Error running ajax query for switch-port/$id/physical-interface" );
-                dd_customer.html("");
-                throw "Error running ajax query for switch-port/$id/physical-interface";
-            })
-        }
-        <?php endif; ?>
+            dd_pi_status.val('');
+            dd_pi_status.trigger("change");
+
+            if( dd_switch_port.val() !== '' ) {
+                let spid = dd_switch_port.val();
+                $.ajax("<?= url( '/api/v4/switch-port' ) ?>/" + spid + "/physical-interface")
+                    .done( function(data) {
+                        div_pi_status.hide();
+                        if( data.physInt !== undefined ) {
+                            dd_pi_status.val(data.physInt.status);
+                            dd_pi_status.trigger("change");
+                            div_pi_status.show();
+                        }
+                    })
+                    .fail(function () {
+                        alert("Error running ajax query for switch-port/$id/physical-interface");
+                        dd_customer.html("");
+                        throw "Error running ajax query for switch-port/$id/physical-interface";
+                    })
+            }
+        } // allocating
     });
 
     /**
      * set data to the switch dropdown related to the customer selected
      */
     dd_customer.change( function(){
-        dd_switch.html( "<option value=\"\">Loading please wait</option>\n" ).trigger( "changed" );
-        dd_switch_port.html("").trigger("changed");
+        dd_switch.html( "<option value=\"\">Loading please wait</option>\n" ).trigger( "change" );
+        dd_switch_port.html("").trigger("change");
 
         let customerId = dd_customer.val();
 
@@ -123,7 +131,7 @@
             alert( "Error running ajax query for api/v4/customer/$id/switches" );
         })
         .always( function() {
-            dd_switch.trigger( "changed" );
+            dd_switch.trigger( "change" );
         });
     });
 
@@ -139,8 +147,8 @@
             options += "<option value=\"" + <?= $id ?> + "\">" + $switch  + "</option>\n";
         <?php endforeach; ?>
 
-        dd_switch.html( options ).trigger( "changed" );
-        dd_switch_port.html('').trigger( "changed" );
+        dd_switch.html( options ).trigger( "change" );
+        dd_switch_port.html('').trigger( "change" );
         resetCustomer();
         $( "#pi_status_area" ).hide();
     });
@@ -157,10 +165,10 @@
      * set data to the switch port dropdown when we select a switch
      */
     function setSwitchPort(){
-        let url, datas, option;
+        let url, datas;
         let switchId        = dd_switch.val();
 
-        dd_switch_port.html( "<option value=\"\">Loading please wait</option>\n" ).trigger( "changed" );
+        dd_switch_port.html( "<option value=\"\">Loading please wait</option>\n" ).trigger( "change" );
 
         <?php if ($t->prewired): ?>
         url = "<?= url( '/api/v4/switch' )?>/" + switchId + "/switch-port-prewired";
@@ -195,7 +203,7 @@
             dd_customer.html("");
         })
         .always( function() {
-            dd_switch_port.trigger( "changed" );
+            dd_switch_port.trigger( "change" );
         });
     }
 
@@ -206,7 +214,7 @@
         if( dd_switch.val() != ''){
             let switchPortId = dd_switch_port.val();
             dd_customer.html( "<option value=\"\">Loading please wait</option>\n" );
-            dd_customer.trigger( "changed" );
+            dd_customer.trigger( "change" );
             $.ajax( "<?= url( '/api/v4/switch-port' ) ?>/" + switchPortId + "/customer" )
             .done( function( data ) {
                 if( data.customerFound ) {
@@ -220,7 +228,7 @@
                 dd_customer.html("");
             })
             .always( function() {
-                dd_customer.trigger( "changed" );
+                dd_customer.trigger( "change" );
             });
         }
     }
@@ -236,7 +244,7 @@
             customer = '<?= $customer ?>';
             options += "<option value=\"" + <?= $id ?> + "\">" + customer  + "</option>\n";
         <?php endforeach; ?>
-        dd_customer.html( options ).trigger( "changed" );
+        dd_customer.html( options ).trigger( "change" );
     }
 
     /**
