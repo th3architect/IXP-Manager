@@ -81,7 +81,7 @@ class GenerateConfiguration extends GrapherCommand {
 
         // backend and options are now valid
         // let's generate the configuration
-        return $this->outputConfiguration( $grapher->generateConfiguration( $this->ixp() )[0] );
+        return $this->outputConfiguration( $grapher->generateConfiguration()[0] );
     }
 
     /**

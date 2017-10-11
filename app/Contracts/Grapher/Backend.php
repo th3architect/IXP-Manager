@@ -23,8 +23,6 @@ namespace IXP\Contracts\Grapher;
  * http://www.gnu.org/licenses/gpl-2.0.html
  */
 
-use Entities\IXP;
-
 use IXP\Services\Grapher\Graph;
 
  /**
@@ -100,11 +98,10 @@ interface Backend {
      * For monolithic files, returns a single element array. Otherwise
      * an array keyed by the filename (with optional local directory path).
      *
-     * @param IXP $ixp The IXP to generate the config for (multi-IXP mode)
      * @param int $type The type of configuration to generate
      * @return array
      */
-    public function generateConfiguration( IXP $ixp, int $type = self::GENERATED_CONFIG_TYPE_MONOLITHIC ): array;
+    public function generateConfiguration( int $type = self::GENERATED_CONFIG_TYPE_MONOLITHIC ): array;
 
     /**
      * Examines the provided graph object and determines if this backend is able to
