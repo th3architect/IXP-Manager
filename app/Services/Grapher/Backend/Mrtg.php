@@ -28,14 +28,20 @@ use IXP\Services\Grapher\Graph;
 use IXP\Exceptions\Services\Grapher\CannotHandleRequestException;
 use IXP\Exceptions\Utils\Grapher\FileError as FileErrorException;
 
-use Entities\{IXP,PhysicalInterface,SwitchPort};
+use Entities\{
+    Customer as CustomerEntity,
+    Infrastructure as InfrastructureEntity,
+    IXP as IXPEntity,
+    PhysicalInterface,
+    SwitchPort
+};
 
 use IXP\Utils\Grapher\{
     Mrtg as MrtgFile,
     Rrd  as RrdUtil
 };
 
-use View,Log;
+use D2EM, Log, View;
 
 /**
  * Grapher Backend -> Mrtg
@@ -101,11 +107,11 @@ class Mrtg extends GrapherBackend implements GrapherBackendContract {
     {
         return [
             View::make( 'services.grapher.mrtg.monolithic', [
-                    'ixp'        => $ixp,
-                    'data'       => $this->getPeeringPorts( $ixp ),
+                    'data'       => $this->getPeeringPorts(),
+                    'ixp'        => D2EM::getRepository( IXPEntity::class )->getDefault(),
                     'snmppasswd' => config('grapher.backends.mrtg.snmppasswd'),
                 ]
-            )->render()
+            )->render(),
         ];
     }
 
@@ -128,10 +134,9 @@ class Mrtg extends GrapherBackend implements GrapherBackendContract {
      * * array `['ixpports']` conataining the PhysicalInterface IDs of peering ports
      *
      *
-     * @param IXP $ixp The IXP to generate the config for (multi-IXP mode)
      * @return array
      */
-    public function getPeeringPorts( IXP $ixp ): array {
+    public function getPeeringPorts(): array {
         $data = [];
         $data['ixpports']            = [];
         $data['ixpports_maxbytes']   = 0;
@@ -149,8 +154,8 @@ class Mrtg extends GrapherBackend implements GrapherBackendContract {
         // we need to wrap switch ports in physical interfaces for switch aggregates and, as such, we need to use unused physical interface IDs
         $maxPiID = 0;
 
-        foreach( $ixp->getCustomers() as $c ) {
-
+        foreach( D2EM::getRepository( CustomerEntity::class )->findAll() as $c ) {
+            /** @var CustomerEntity $c $vi */
             foreach( $c->getVirtualInterfaces() as $vi ) {
 
                 // we do not include core bundle interfaces here
@@ -162,11 +167,6 @@ class Mrtg extends GrapherBackend implements GrapherBackendContract {
 
                     if( $pi->getId() > $maxPiID ) {
                         $maxPiID = $pi->getId();
-                    }
-
-                    // we're not multi-ixp in v4 but we'll catch non-relavent ports here
-                    if( $pi->getSwitchPort()->getSwitcher()->getInfrastructure()->getIXP()->getId() != $ixp->getId() ) {
-                        break 2;
                     }
 
                     if( !$pi->statusIsConnectedOrQuarantine() || !$pi->getSwitchPort()->getSwitcher()->getActive() ) {
@@ -209,7 +209,8 @@ class Mrtg extends GrapherBackend implements GrapherBackendContract {
 
         // include core switch ports.
         // This is a slight hack as the template requires PhysicalInterfaces so we wrap core SwitchPorts in temporary PhyInts.
-        foreach( $ixp->getInfrastructures() as $infra ) {
+        foreach( D2EM::getRepository( InfrastructureEntity::class )->findAll() as $infra ) {
+            /** @var InfrastructureEntity $infra */
             foreach( $infra->getSwitchers() as $switch ) {
                 foreach( $switch->getPorts() as $sp ) {
                     if( $sp->isTypeCore() ) {
@@ -263,45 +264,45 @@ class Mrtg extends GrapherBackend implements GrapherBackendContract {
                 'categories'  => [ Graph::CATEGORY_BITS => Graph::CATEGORY_BITS,
                                     Graph::CATEGORY_PACKETS => Graph::CATEGORY_PACKETS ],
                 'periods'     => Graph::PERIODS,
-                'types'       => $rrd ? Graph::TYPES : array_except( Graph::TYPES, Graph::TYPE_RRD )
+                'types'       => $rrd ? Graph::TYPES : array_except( Graph::TYPES, Graph::TYPE_RRD ),
             ],
             'infrastructure' => [
                 'protocols'   => [ Graph::PROTOCOL_ALL => Graph::PROTOCOL_ALL ],
                 'categories'  => [ Graph::CATEGORY_BITS => Graph::CATEGORY_BITS,
                                     Graph::CATEGORY_PACKETS => Graph::CATEGORY_PACKETS ],
                 'periods'     => Graph::PERIODS,
-                'types'       => $rrd ? Graph::TYPES : array_except( Graph::TYPES, Graph::TYPE_RRD )
+                'types'       => $rrd ? Graph::TYPES : array_except( Graph::TYPES, Graph::TYPE_RRD ),
             ],
             'switcher' => [
                 'protocols'   => [ Graph::PROTOCOL_ALL => Graph::PROTOCOL_ALL ],
                 'categories'  => [ Graph::CATEGORY_BITS => Graph::CATEGORY_BITS,
                                     Graph::CATEGORY_PACKETS => Graph::CATEGORY_PACKETS ],
                 'periods'     => Graph::PERIODS,
-                'types'       => $rrd ? Graph::TYPES : array_except( Graph::TYPES, Graph::TYPE_RRD )
+                'types'       => $rrd ? Graph::TYPES : array_except( Graph::TYPES, Graph::TYPE_RRD ),
             ],
             'trunk' => [
                 'protocols'   => [ Graph::PROTOCOL_ALL => Graph::PROTOCOL_ALL ],
                 'categories'  => [ Graph::CATEGORY_BITS => Graph::CATEGORY_BITS ],
                 'periods'     => Graph::PERIODS,
-                'types'       => $rrd ? Graph::TYPES : array_except( Graph::TYPES, Graph::TYPE_RRD )
+                'types'       => $rrd ? Graph::TYPES : array_except( Graph::TYPES, Graph::TYPE_RRD ),
             ],
             'physicalinterface' => [
                 'protocols'   => [ Graph::PROTOCOL_ALL => Graph::PROTOCOL_ALL ],
                 'categories'  => Graph::CATEGORIES,
                 'periods'     => Graph::PERIODS,
-                'types'       => $rrd ? Graph::TYPES : array_except( Graph::TYPES, Graph::TYPE_RRD )
+                'types'       => $rrd ? Graph::TYPES : array_except( Graph::TYPES, Graph::TYPE_RRD ),
             ],
             'virtualinterface' => [
                 'protocols'   => [ Graph::PROTOCOL_ALL => Graph::PROTOCOL_ALL ],
                 'categories'  => Graph::CATEGORIES,
                 'periods'     => Graph::PERIODS,
-                'types'       => $rrd ? Graph::TYPES : array_except( Graph::TYPES, Graph::TYPE_RRD )
+                'types'       => $rrd ? Graph::TYPES : array_except( Graph::TYPES, Graph::TYPE_RRD ),
             ],
             'customer' => [
                 'protocols'   => [ Graph::PROTOCOL_ALL => Graph::PROTOCOL_ALL ],
                 'categories'  => Graph::CATEGORIES,
                 'periods'     => Graph::PERIODS,
-                'types'       => $rrd ? Graph::TYPES : array_except( Graph::TYPES, Graph::TYPE_RRD )
+                'types'       => $rrd ? Graph::TYPES : array_except( Graph::TYPES, Graph::TYPE_RRD ),
             ],
         ];
     }
