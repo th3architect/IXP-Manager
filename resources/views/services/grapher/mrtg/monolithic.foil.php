@@ -20,6 +20,8 @@
 
 <?= $this->insert('services/grapher/mrtg/switch-aggregates'); ?>
 
+<?= $this->insert('services/grapher/mrtg/core-bundles'); ?>
+
 <?= $this->insert('services/grapher/mrtg/trunks'); ?>
 
 <?= $this->insert('services/grapher/mrtg/member-ports'); ?>
