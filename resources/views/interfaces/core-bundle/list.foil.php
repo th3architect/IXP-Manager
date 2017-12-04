@@ -36,33 +36,39 @@ $this->layout( 'layouts/ixpv4' );
         <table id='table-cb' class="table">
             <thead>
             <tr>
-                <td>
+                <th>
+                    DB ID
+                </th>
+                <th>
                     Description
-                </td>
-                <td>
+                </th>
+                <th>
                     Type
-                </td>
-                <td>
+                </th>
+                <th>
                     Enabled
-                </td>
-                <td>
+                </th>
+                <th>
                     Switch A
-                </td>
-                <td>
+                </th>
+                <th>
                     Switch B
-                </td>
-                <td>
+                </th>
+                <th>
                     Capacity
-                </td>
-                <td>
+                </th>
+                <th>
                     Action
-                </td>
+                </th>
             </tr>
             <thead>
             <tbody>
                 <?php foreach( $t->cbs as $cb ):
                     /** @var \Entities\CoreBundle $cb */?>
                     <tr>
+                        <td>
+                            <?= $cb->getId() ?>
+                        </td>
                         <td>
                             <?= $t->ee( $cb->getDescription() )  ?>
                         </td>
@@ -75,7 +81,7 @@ $this->layout( 'layouts/ixpv4' );
                             <?php elseif( $cb->getEnabled() && $cb->doAllCoreLinksEnabled() ): ?>
                                 <i class="glyphicon glyphicon-ok"></i>
                             <?php else:?>
-                            <span class="label label-warning"> <?= count( $cb->getCoreLinksEnabled() ) ?> / <?= count( $cb->getCoreLinks() )?> </span>
+                                <span class="label label-warning"><?= count( $cb->getCoreLinksEnabled() ) ?> / <?= count( $cb->getCoreLinks() )?></span>
                             <?php endif; ?>
                         </td>
                         <td>

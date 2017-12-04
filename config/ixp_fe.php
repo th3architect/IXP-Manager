@@ -62,7 +62,6 @@ return [
         ],
 
         'beta' => [
-            'core_bundles' => env( 'IXP_FE_BETA_CORE_BUNDLES', false ),
         ],
 
     ],

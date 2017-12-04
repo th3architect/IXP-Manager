@@ -124,13 +124,10 @@
                 </li>
 
 
-                <?php if( config( 'ixp_fe.frontend.beta.core_bundles', false ) ): ?>
+                <li class="<?= $t->controller != 'CoreBundleController' ?: "active" ?>" >
+                    <a href="<?= route('core-bundle/list' ) ?>">Core Bundles</a>
+                </li>
 
-                    <li class="<?= $t->controller != 'CoreBundleController' ?: "active" ?>" >
-                        <a href="<?= route('core-bundle/list' ) ?>">Core Bundles</a>
-                    </li>
-
-                <?php endif; ?>
 
                 <li>
                     <a href="<?= route('ip-address@list', [ 'protocol' => 6 ] ) ?>">IP Addresses</a>
