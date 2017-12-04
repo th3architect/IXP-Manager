@@ -79,13 +79,12 @@ class CoreBundleController extends Common
      * @return View
      */
     public function addWizard(): View {
-        /** @noinspection PhpUndefinedMethodInspection - need to sort D2EM::getRepository factory inspection */
         return view( 'interfaces/core-bundle/add-wizard' )->with([
-            'switches'                      => D2EM::getRepository( SwitcherEntity::class )->getNames(),
-            'customers'                     => D2EM::getRepository( CustomerEntity::class )->getAsArray( null, [CustomerEntity::TYPE_INTERNAL] ),
-            'types'                         => CoreBundleEntity::$TYPES,
-            'speed'                         => PhysicalInterfaceEntity::$SPEED,
-            'duplex'                        => PhysicalInterfaceEntity::$DUPLEX
+            'switches'     => D2EM::getRepository( SwitcherEntity::class )->getNames(),
+            'customers'    => D2EM::getRepository( CustomerEntity::class )->getAsArray( null, [CustomerEntity::TYPE_INTERNAL] ),
+            'types'        => CoreBundleEntity::$TYPES,
+            'speed'        => PhysicalInterfaceEntity::$SPEED,
+            'duplex'       => PhysicalInterfaceEntity::$DUPLEX
         ]);
     }
 

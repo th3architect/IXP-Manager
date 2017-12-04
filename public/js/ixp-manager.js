@@ -36,7 +36,7 @@ $( 'document' ).ready( function(){
     // Activate the Bootstrap menubar
     $('.dropdown-toggle').dropdown();
 
-    // show form errors. FIXME: shouldn;t need this. Interference with help text logic...
+    // show form errors. FIXME: shouldn't need this. Interference with help text logic...
     $( "span.help-block" ).show();
 
     /**
@@ -44,6 +44,7 @@ $( 'document' ).ready( function(){
      */
     $( "#help-btn" ).click( function() {
         $( "p.help-block" ).toggle();
+        $( "div.help-block" ).toggle();
         $( "#instructions-alert").toggle();
     });
 
