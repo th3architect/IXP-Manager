@@ -14,7 +14,7 @@
                 <?= Former::select( 'sp-a-'.$t->nbLink )
                     ->id( 'sp-a-'.$t->nbLink )
                     ->label( '' )
-                    ->placeholder( 'Choose a switch port' )
+                    ->placeholder( 'Choose a switch port...' )
                     ->addClass( 'chzn-select' )
                 ?>
                 <?= Former::hidden( 'hidden-sp-a-'.$t->nbLink )
@@ -30,7 +30,7 @@
                 <?= Former::select( 'sp-b-'.$t->nbLink )
                     ->id( 'sp-b-'.$t->nbLink )
                     ->label( '' )
-                    ->placeholder( 'Choose a switch port' )
+                    ->placeholder( 'Choose a switch port...' )
                     ->addClass( 'chzn-select' )
                 ?>
                 <?= Former::hidden( 'hidden-sp-b-'.$t->nbLink )
@@ -48,6 +48,7 @@
                     ->label( '' )
                     ->unchecked_value( 0 )
                     ->check( $t->enabled )
+                    ->addGroupClass( 'core-bundles-wizard-core-links-checkboxes' )
                 ?>
             </div>
 
@@ -61,6 +62,7 @@
                         ->label( '' )
                         ->unchecked_value( 0 )
                         ->value( 1 )
+                        ->addGroupClass( 'core-bundles-wizard-core-links-checkboxes' )
                     ?>
                 <?php endif; ?>
             </div>
@@ -73,7 +75,7 @@
                     <hr>
                     <?= Former::text( 'subnet-'.$t->nbLink )
                         ->label( '' )
-                        ->placeholder( '192.0.2.0/30' )
+                        ->placeholder( '192.0.2.0/31 | 2001:db8::/127' )
                     ?>
                 <?php endif; ?>
             </div>
@@ -91,7 +93,6 @@
     </div>
 </div>
 
-<?php $this->section( 'scripts' ) ?>
 <script>
     $(document).ready( function() {
         dropdownChosen();
@@ -127,4 +128,3 @@
         });
     }
 </script>
-<?php $this->append() ?>
