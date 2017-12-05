@@ -264,6 +264,9 @@
             <hr>
         </div>
 
+        <div style="clear: both"></div>
+
+        <div id="div-common-settings"></div>
 
         <div class="col-sm-6">
             <?= Former::select( 'switch-a' )

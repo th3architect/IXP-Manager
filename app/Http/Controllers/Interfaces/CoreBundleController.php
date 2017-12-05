@@ -80,7 +80,7 @@ class CoreBundleController extends Common
      */
     public function addWizard(): View {
         return view( 'interfaces/core-bundle/add-wizard' )->with([
-            'switches'     => D2EM::getRepository( SwitcherEntity::class )->getNames(),
+            'switches'     => D2EM::getRepository( SwitcherEntity::class )->getNames( true, SwitcherEntity::TYPE_SWITCH ),
             'customers'    => D2EM::getRepository( CustomerEntity::class )->getAsArray( null, [CustomerEntity::TYPE_INTERNAL] ),
             'types'        => CoreBundleEntity::$TYPES,
             'speed'        => PhysicalInterfaceEntity::$SPEED,

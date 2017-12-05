@@ -1,97 +1,125 @@
 <script>
-    /**
-     * set data to the switch port dropdown when we select a switcher
-     */
-    function setSwitchPort( sside, id, action, edit ){
-        let datas;
-        let switchId = $( "#switch-" + sside ).val();
 
-        if( $("#nb-core-links").val() > 0 || edit ){
-            $( "#sp-" + sside + "-"+ id ).html( "<option value=\"\">Loading please wait</option>\n" ).trigger('change.select2');
+let excludedSwitchPortSideA  = [];
+let excludedSwitchPortSideB  = [];
+
+/**
+ * Insert in an array all the switch ports selected from all the switch port dropdowns
+ * in order the exclude them from the new switch port dropdowns that could be added
+ */
+function excludedSwitchPort( sside ){
+    $( "[id|='sp'] :selected" ).each( function() {
+        if( this.value.trim() !== '' ) {
+            if( sside === 'a' ) {
+                excludedSwitchPortSideA.push( this.value );
+            } else {
+                excludedSwitchPortSideB.push( this.value );
+            }
+        }
+    });
+}
+
+
+    /**
+ * set data to the switch port dropdown when we select a switcher
+ */
+function setSwitchPort( sside, id, action, edit ) {
+    let postData;
+    let switchId = $( "#switch-" + sside ).val();
+
+    if( $("#nb-core-links").val() > 0 || edit ) {
+
+        $( "#sp-" + sside + "-"+ id ).html( `<option value="">Loading, please wait...</option>\n` ).trigger( 'change.select2' );
+
+        if( !edit ) {
+            excludedSwitchPort();
+        }
+
+        if( switchId !== null && switchId.trim() !== '' ) {
+            let url = "<?= url( '/api/v4/switch' )?>/" + switchId + "/switch-port";
+
             if( !edit ) {
-                excludedSwitchPort();
+                postData = {
+                    spIdsExcluded: excludedSwitchPortSideA.concat( excludedSwitchPortSideB )
+                };
+            } else {
+                postData = {
+                    spIdsExcluded: []
+                };
             }
 
-            if( switchId != null && switchId != '' ){
-                let url = "<?= url( '/api/v4/switch' )?>/" + switchId + "/switch-port";
-
-                if( !edit ){
-                    datas = {
-                        spIdsexcluded: exludedSwitchPortSideA.concat( exludedSwitchPortSideB )
-                    };
-                } else {
-                    datas = {
-                        spIdsexcluded: []
-                    };
-                }
-
-                $.ajax( url , {
-                    data: datas,
+            $.ajax( url , {
+                    data: postData,
                     type: 'POST'
                 })
-
                 .done( function( data ) {
-                    let options = "<option value=\"\">Choose a switch port</option>\n";
-                    $.each( data.listPorts, function( key, value ){
-                        options += "<option value=\"" + value.id + "\">" + value.name + " (" + value.type + ")</option>\n";
-                    });
-                    $( "#sp-" + sside + "-"+ id ).html( options );
+                    let options = `<option value="">Choose a switch port...</option>\n`;
 
-                    if( action == 'addBtn' ){
+                    $.each( data.listPorts, function( key, value ) {
+                        options += `<option value="${value.id}">${value.name} (${value.type})</option>\n`;
+                    });
+
+                    $( "#sp-" + sside + "-" + id ).html( options );
+
+                    if( action === 'addBtn' ) {
                         selectNextSwitchPort( id, sside );
                     }
                 })
                 .fail( function() {
-                    throw new Error( `Error running ajax query for ${url}` );
                     alert( `Error running ajax query for ${url}` );
+                    throw new Error( `Error running ajax query for ${url}` );
                 })
                 .always( function() {
                     $( "#sp-" + sside + "-"+ id ).trigger('change.select2');
                 });
-            }
         }
     }
+}
 
-    /**
-     * Select the switch port depending of the previous core links
-     */
-    function selectNextSwitchPort(id , side){
-        let lastIdSwitchPort = id - 1;
-        let nextValue = parseInt($( '#sp-' + side + '-'+ lastIdSwitchPort ).val()) + parseInt(1);
-        if( $( "#sp-" + side + "-" + id + " option[value='"+nextValue+"']" ).length ) {
-            $( '#sp-' + side + '-'+ id).val( nextValue ).trigger('change.select2');
-        }
+/**
+ * Select the next sequential switch port depending of the previous core links
+ */
+function selectNextSwitchPort( id, side ) {
 
-        $("#hidden-sp-"+ side + '-' + id).val( $("#sp-"+ side + "-" + id).val() );
+    let nextSwitchPortId = parseInt( $( '#sp-' + side + '-' + (id - 1) ).val() ) + 1;
+    let dropdownId       = "#sp-" + side + "-" + id;
+    if( $( dropdownId + " option[value='" + nextSwitchPortId + "']" ).length ) {
+        $( dropdownId ).val( nextSwitchPortId ).trigger('change.select2');
     }
 
-    /**
-     * check if the subnet is valid and display a message
-     */
-    function checkSubnet( subnet ){
-        $( "#"+subnet ).parent().parent().removeClass( 'has-error' );
-        $( "#"+subnet ).parent().find('span').remove();
-        if( $( "#"+subnet ).val() != '' ){
-            if( !validSubnet( $( "#"+subnet ).val() ) ){
-                $( "#"+subnet ).parent().parent().addClass( 'has-error' );
-                $( "#"+subnet ).parent().append("<span class='help-block' style='display: block'>The subnet is not valid</span> ");
-            }
-            else{
-                $( "#"+subnet ).parent().parent().addClass( 'has-success' );
-                $( "#"+subnet ).parent().append("<span class='help-block' style='display: block' >The subnet is valid</span> ");
-            }
-        }
+    $( "#hidden-sp-"+ side + '-' + id ).val( $( dropdownId ).val() );
+}
+
+/**
+ * check if the subnet is valid and display a message
+ */
+function checkSubnet( subnet ) {
+
+    let e = $( "#"+subnet );
+
+    e.parent().parent().removeClass( 'has-error' );
+    e.parent().find('span').remove();
+
+    if( e.val().trim() !== '' && !validSubnet( e.val() ) ) {
+        e.parent().parent().addClass( 'has-error' );
+        e.parent().append( "<span class='help-block' style='display: block'>The subnet is not valid</span>" );
+    }
+}
+
+/**
+ * Check if the subnet provided is valid
+ */
+function validSubnet( subnet ) {
+
+    let address;
+
+    if( subnet.indexOf( ':' ) === -1 ) {
+        address = new Address4(subnet);
+    } else {
+        address = new Address6(subnet);
     }
 
-    /**
-     * Check if the subnet provided is valid
-     */
-    function validSubnet( subnet ){
-        let address = new Address4( subnet );
-        if( address.isValid() ){
-            return true;
-        } else {
-            return false;
-        }
-    }
+    return address.isValid();
+}
+
 </script>
