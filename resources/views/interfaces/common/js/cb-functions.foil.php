@@ -8,19 +8,24 @@ let excludedSwitchPortSideB  = [];
  * in order the exclude them from the new switch port dropdowns that could be added
  */
 function excludedSwitchPort( sside ){
-    $( "[id|='sp'] :selected" ).each( function() {
+
+    $( "[id|='sp-" +sside+ "'] :selected" ).each( function() {
         if( this.value.trim() !== '' ) {
             if( sside === 'a' ) {
-                excludedSwitchPortSideA.push( this.value );
+                if( excludedSwitchPortSideA.indexOf( this.value ) === -1 ){
+                    excludedSwitchPortSideA.push( this.value );
+                }
             } else {
-                excludedSwitchPortSideB.push( this.value );
+                if( excludedSwitchPortSideB.indexOf( this.value ) === -1 ) {
+                    excludedSwitchPortSideB.push(this.value);
+                }
             }
         }
     });
 }
 
 
-    /**
+/**
  * set data to the switch port dropdown when we select a switcher
  */
 function setSwitchPort( sside, id, action, edit ) {
@@ -32,7 +37,7 @@ function setSwitchPort( sside, id, action, edit ) {
         $( "#sp-" + sside + "-"+ id ).html( `<option value="">Loading, please wait...</option>\n` ).trigger( 'change.select2' );
 
         if( !edit ) {
-            excludedSwitchPort();
+            excludedSwitchPort( sside );
         }
 
         if( switchId !== null && switchId.trim() !== '' ) {
@@ -81,9 +86,13 @@ function setSwitchPort( sside, id, action, edit ) {
  */
 function selectNextSwitchPort( id, side ) {
 
-    let nextSwitchPortId = parseInt( $( '#sp-' + side + '-' + (id - 1) ).val() ) + 1;
     let dropdownId       = "#sp-" + side + "-" + id;
-    if( $( dropdownId + " option[value='" + nextSwitchPortId + "']" ).length ) {
+    let lastdropdownId   = "#sp-" + side + "-" + (id - 1);
+
+    let nextSwitchPortId = $( lastdropdownId + " option:selected" ).next().val();
+
+
+    if( undefined !==  $( dropdownId + " option[value='" + nextSwitchPortId + "']" ) && $( dropdownId + " option[value='" + nextSwitchPortId + "']" ).length  ) {
         $( dropdownId ).val( nextSwitchPortId ).trigger('change.select2');
     }
 
